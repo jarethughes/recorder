@@ -7,13 +7,16 @@ app.use(express.json({ limit: "1mb" }));
 const port = 3000;
 app.listen(port, () => console.log("Listening at " + port));
 
+const apiKey = "";
+const apiURL = "http://ws.audioscrobbler.com/2.0";
+
 // app.get("/", function (request, response) {
 //   response.send("Hello World!");
 // });
 
 app.post("/api", (request, response) => {
   const timestamp = Date.now();
-  console.log("Request Received");
+  console.log("Request Received at " + timestamp);
   const data = request.body;
   data.timestamp = timestamp;
 
@@ -29,6 +32,10 @@ app.post("/api", (request, response) => {
   // const tracklist = getTracklist(album);
   // postListens(tracklist);
 });
+
+function getTrackList() {
+  //foo
+}
 
 // function receiveData(){} returns {artist: "", album: ""}
 // function getTrackList(){} returns {artist: "", album: "", tracks: [{number: , title: ""},...]}
