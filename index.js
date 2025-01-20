@@ -7,8 +7,9 @@ app.use(express.json({ limit: "1mb" }));
 const port = 3000;
 app.listen(port, () => console.log("Listening at " + port));
 
-const apiKey = "";
 const apiURL = "http://ws.audioscrobbler.com/2.0";
+
+console.log(process.env.lastfmAPIKey);
 
 // app.get("/", function (request, response) {
 //   response.send("Hello World!");
