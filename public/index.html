@@ -16,10 +16,124 @@
       <input type="text" id="artist" name="artist" required /><br />
       <label for="album">Album:</label><br />
       <input type="text" id="album" name="album" required /><br /><br />
-      <button type="button" id="submitButton" onclick="postToServer()">
+      <button type="button" id="submitButton" onclick="postScrobbles()">
         Submit
       </button>
     </form>
+    <script>
+      class LastFMAuth {
+        constructor(apiKey, apiSecret) {
+          this.apiKey = apiKey;
+          this.apiSecret = apiSecret;
+          this.baseURL = "http://ws.audioscrobbler.com/2.0";
+        }
+
+        async generateSignature(params) {
+          const sortedParams = Object.keys(params)
+            .sort()
+            .reduce((acc, key) => {
+              acc[key] = params[key];
+              return acc;
+            }, {});
+
+          const stringToSign = "";
+          Object.entries(sortedParams).forEach(([name, value]) => {
+            stringToSign += name + value;
+          });
+
+          stringToSign += this.apiSecret;
+
+          const encoder = new TextEncoder();
+          const data = encoder.encode(stringToSign);
+          const hashBuffer = await crypto.subtle.digest("MD5", data);
+
+          return Array.from(new Uint8Array(hashBuffer))
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+        }
+
+        async getAuthURL() {
+          const params = {
+            api_key: this.apiKey,
+            method: "auth.getToken",
+          };
+
+          params.api_sig = await this.generateSignature(params);
+
+          const urlParams = new URLSearchParams({
+            ...params,
+            format: "json",
+          });
+
+          try {
+            const response = await fetch(`${this.baseURL}?${urlParams}`);
+
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const token = data.token;
+
+            // Return authentication URL
+            return `http://www.last.fm/api/auth/?api_key=${this.apiKey}&token=${token}`;
+          } catch (error) {
+            throw new Error(`Failed to get token: ${error.message}`);
+          }
+        }
+        async getSession(token) {
+          const params = {
+            api_key: this.apiKey,
+            method: "auth.getSession",
+            token: token,
+          };
+
+          // Add signature
+          params.api_sig = await this.generateSignature(params);
+
+          // Build URL with parameters
+          const urlParams = new URLSearchParams({
+            ...params,
+            format: "json",
+          });
+
+          try {
+            const response = await fetch(`${this.baseUrl}?${urlParams}`);
+
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.session?.key;
+          } catch (error) {
+            throw new Error(`Failed to get session: ${error.message}`);
+          }
+        }
+      }
+      const auth = new LastFMAuth("your_api_key_here", "your_api_secret_here");
+
+      async function authenticate() {
+        try {
+          // Get the authentication URL
+          const authUrl = await auth.getAuthUrl();
+          console.log(
+            `Please visit this URL to authorize the application: ${authUrl}`
+          );
+
+          // After the user authorizes your application, they'll be redirected back
+          // In a real application, you'd probably handle this with a callback URL
+          // This is just for demonstration
+          const token = prompt("Enter the token from the redirect URL:");
+
+          // Get the session key
+          const sessionKey = await auth.getSession(token);
+          console.log(`Your session key is: ${sessionKey}`);
+        } catch (error) {
+          console.error("Authentication failed:", error);
+        }
+      }
+      authenticate();
+    </script>
     <script>
       //const data = { artist, album };
       //const options = {
@@ -33,28 +147,42 @@
       //    .getElementById("submitButton")
       //    .addEventListener("click", postToServer());
       //});
+      async function getTracklistfromLastFM() {
+        //foo
+      }
+      async function postScrobbles() {
+        // like main()
+        const data = getDataFromForm();
+        const tracklist = getTracklistfromLastFM();
 
-      async function postToServer() {
-        // Get input data from fields
-        const artist = document.getElementById("artist").value;
-        const album = document.getElementById("album").value;
-        const data = { artist, album };
-        console.log("Data: ");
-        console.log(data);
-
-        // Setup POST request
         const options = {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
         };
 
-        //POST request and give response in console
-        const response = await fetch("/api", options);
+        const response = await fetch("URL", options);
         const responseJSON = await response.json();
-        console.log("Response JSON: ");
-        console.log(responseJSON);
       }
+      //   async function postToServer() {
+      //     // Get input data from fields
+      //     const artist = document.getElementById("artist").value;
+      //     const album = document.getElementById("album").value;
+      //     const data = { artist, album };
+      //     console.log("Data: ");
+      //     console.log(data);
+
+      //     // Setup POST request
+      //     const options = {
+      //       method: "POST",
+      //       headers: { "Content-Type": "application/json" },
+      //       body: JSON.stringify(data),
+      //     };
+
+      //     //POST request and give response in console
+      //     const response = await fetch("/api", options);
+      //     const responseJSON = await response.json();
+      //     console.log("Response JSON: ");
+      //     console.log(responseJSON);
+      //   }
     </script>
     <!--<script src="sendToServer.js"></script>-->
   </body>
