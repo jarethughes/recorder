@@ -10,22 +10,47 @@
   </head>
   <body>
     <h1>Recorder</h1>
-    <h2>A website to record offline whole-album listens to last.fm</h2>
+    <h2>A website to record offline, whole-album listens to last.fm</h2>
     <form>
-      <label for="artist">Artist:</label>
-      <input type="text" id="artist" name="artist" required />
-      <label for="album">Album:</label>
-      <input type="text" id="album" name="album" required />
-      <button type="button" id="submitButton">Submit</button>
+      <label for="artist">Artist:</label><br />
+      <input type="text" id="artist" name="artist" required /><br />
+      <label for="album">Album:</label><br />
+      <input type="text" id="album" name="album" required /><br /><br />
+      <button type="button" id="submitButton" onclick="postToServer()">
+        Submit
+      </button>
     </form>
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        document
-          .getElementById("submitButton")
-          .addEventListener("click", function () {
-            sendToServer();
-          });
-      });
+      //const data = { artist, album };
+      //const options = {
+      //  method: "POST",
+      //  headers: { "Content-Type": "application/json" },
+      //  body: JSON.stringify(data),
+      //};
+
+      //document.addEventListener("DOMContentLoaded", () => {
+      //  document
+      //    .getElementById("submitButton")
+      //    .addEventListener("click", postToServer());
+      //});
+
+      async function postToServer() {
+        const artist = document.getElementById("artist").value;
+        const album = document.getElementById("album").value;
+        const data = { artist, album };
+        console.log(data);
+
+        const options = {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        };
+
+        const response = await fetch("/api", options);
+        const responseJSON = await response.json();
+        console.log(responseJSON);
+      }
     </script>
+    <!--<script src="sendToServer.js"></script>-->
   </body>
 </html>
