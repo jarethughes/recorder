@@ -35,24 +35,27 @@
       //});
 
       async function postToServer() {
+        // Get input data from fields
         const artist = document.getElementById("artist").value;
         const album = document.getElementById("album").value;
         const data = { artist, album };
+        console.log("Data: ");
         console.log(data);
 
+        // Setup POST request
         const options = {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
         };
 
+        //POST request and give response in console
         const response = await fetch("/api", options);
         const responseJSON = await response.json();
+        console.log("Response JSON: ");
         console.log(responseJSON);
       }
     </script>
-    <script type="text/javascript" src="lastfm.api.md5.js"></script>
-    <script type="text/javascript" src="lastfm.api.js"></script>
     <!--<script src="sendToServer.js"></script>-->
   </body>
 </html>
